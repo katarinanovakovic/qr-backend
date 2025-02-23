@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cors = require ("cors");
+const Subject = require('./models/Subject');
+
 
 const app = express();
 app.use(express.json());
@@ -48,6 +50,41 @@ app.post("/login", async (req, res) => {
 
   // Vraćanje odgovora sa tokenom i rolom
   res.json({ token, role: user.role });
+
+});
+
+// API za dohvat profesora
+app.get("/professors", async (req, res) => {
+  try {
+    // Dohvati sve korisnike koji imaju rolu 'professor'
+    const professors = await User.find({ role: "professor" });
+    res.json(professors);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching professors", error });
+  }
+});
+
+
+// API za dohvat studenata
+app.get("/students", async (req, res) => {
+  try {
+    // Dohvati sve korisnike koji imaju rolu 'student'
+    const students = await User.find({ role: "student" });
+    res.json(students);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching students", error });
+  }
+});
+
+// API za dohvat predmeta
+app.get("/subjects", async (req, res) => {
+  try {
+    const subjects = await Subject.find().populate('professorId').populate('students');
+    res.json(subjects);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching subjects" });
+  }
 });
 
 // Pokreni server
